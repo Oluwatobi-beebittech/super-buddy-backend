@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  super-buddy-api:
+    image: node:18-alpine
+    container_name: super-buddy-api
+    build:
+      context: .
+    command: npm run start:dev
+    env_file:
+      - .env
+    ports:
+      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
+    volumes:
+      - .:/usr/src/app
+      - node_modules_data:/usr/src/app/node_modules
+    networks:
+      super-buddy-network:
+    depends_on:
+      - super-buddy-mysql-server
+
+  super-buddy-mysql-server:
+    image: ${DB_SERVER}
+    container_name: super-buddy-mysql-server
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      super-buddy-network:
+
+volumes:
+  mysql_data:
+  node_modules_data:
+
+networks:
+  super-buddy-network:
+    name: super-buddy-network

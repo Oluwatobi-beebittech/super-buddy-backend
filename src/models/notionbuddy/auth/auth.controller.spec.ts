@@ -17,7 +17,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "HHello Notion buddy"', () => {
-      expect(authController.getHello()).toBe('Hello Notion buddy');
+      expect(authController.getAuthorisation()).toBe('Hello Notion buddy');
     });
   });
 });

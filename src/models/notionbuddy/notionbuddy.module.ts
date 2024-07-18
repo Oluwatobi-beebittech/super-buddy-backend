@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from './auth/auth.module';
-
-const models = [AuthModule];
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: models,
-  exports: models,
+  imports: [AuthModule, UsersModule],
 })
 export class NotionBuddyModule {}
