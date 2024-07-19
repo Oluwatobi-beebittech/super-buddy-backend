@@ -106,9 +106,28 @@ export class AuthController {
   @Get('/callback')
   async finaliseNotionConnect(@Request() req, @Res() res) {
     const {
-      query: { code, state: userId },
+      query: { code, error, state: userId },
     } = req;
     const canvaDesignURL: string = 'https://www.canva.com';
+    const isRegisteredUser = await this.usersService.isRegisteredUser({
+      userId,
+    });
+
+    if (!isRegisteredUser) {
+      return res.status(302).redirect(canvaDesignURL);
+    }
+
+    const { canvaDesignId } = await this.usersService.getRegisteredUser({
+      userId,
+    });
+
+    const canvaRedirectURL: string = canvaDesignId
+      ? `${canvaDesignURL}/design/${canvaDesignId}`
+      : canvaDesignURL;
+
+    if (Boolean(error)) {
+      return res.status(302).redirect(canvaRedirectURL);
+    }
 
     const {
       access_token: notionAccessToken,
@@ -118,32 +137,21 @@ export class AuthController {
       workspace_icon: notionWorkspaceIcon,
       owner,
     } = await this.authService.finaliseNotionConnection(code);
-    const isRegisteredUser = await this.usersService.isRegisteredUser({
-      userId,
+
+    const { affected } = await this.usersService.update(userId, {
+      notionAccessToken,
+      notionBotId,
+      notionWorkspaceName,
+      notionWorkspaceId,
+      notionWorkspaceIcon,
+      notionOwner: JSON.stringify(owner),
     });
 
-    if (isRegisteredUser) {
-      const { affected } = await this.usersService.update(userId, {
-        notionAccessToken,
-        notionBotId,
-        notionWorkspaceName,
-        notionWorkspaceId,
-        notionWorkspaceIcon,
-        notionOwner: JSON.stringify(owner),
-      });
-
-      if (!Boolean(affected)) res.status(302).redirect(canvaDesignURL);
-
-      const { canvaDesignId } = await this.usersService.getRegisteredUser({
-        userId,
-      });
-      const canvaRedirectURL: string = canvaDesignId
-        ? `${canvaDesignURL}/design/${canvaDesignId}`
-        : canvaDesignURL;
-
-      return res.status(302).redirect(canvaRedirectURL);
+    if (!Boolean(affected)) {
+      //should log error inserting record for userID
+      res.status(302).redirect(canvaDesignURL);
     }
 
-    return res.status(302).redirect(canvaDesignURL);
+    return res.status(302).redirect(canvaRedirectURL);
   }
 }
