@@ -28,4 +28,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsNotEmpty()
   notionWorkspaceId?: string | undefined;
+
+  @IsOptional()
+  @IsNotEmpty()
+  isNotionAccessTokenValid?: boolean | undefined;
 }

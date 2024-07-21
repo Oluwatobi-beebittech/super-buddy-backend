@@ -15,6 +15,8 @@ type DigitalOceanConfig = {
   NOTION_AUTH_URL: string;
   NOTIONBUDDY_APP_ID: string;
   NOTION_OAUTH_TOKEN_URL: string;
+  NOTION_SEARCH_URL: string;
+  NOTION_VERSION: string;
 };
 
 export const DigitalOceanConfig: DigitalOceanConfig = {
@@ -34,4 +36,6 @@ export const DigitalOceanConfig: DigitalOceanConfig = {
   NOTION_AUTH_URL: process.env.NOTION_AUTH_URL,
   NOTIONBUDDY_APP_ID: process.env.NOTIONBUDDY_APP_ID,
   NOTION_OAUTH_TOKEN_URL: process.env.NOTION_OAUTH_TOKEN_URL,
+  NOTION_SEARCH_URL: process.env.NOTION_SEARCH_URL,
+  NOTION_VERSION: process.env.NOTION_VERSION,
 };

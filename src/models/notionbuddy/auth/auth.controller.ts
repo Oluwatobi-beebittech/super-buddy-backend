@@ -30,10 +30,15 @@ export class AuthController {
       canvaUserId,
     });
     if (isRegisteredUser) {
-      const { userId } = await this.usersService.getRegisteredUser({
-        canvaUserId,
+      const { userId, notionAccessToken, isNotionAccessTokenValid } =
+        await this.usersService.getRegisteredUser({
+          canvaUserId,
+        });
+      return res.status(200).json({
+        userId,
+        hasNotionAccessToken: Boolean(notionAccessToken),
+        isNotionAccessTokenValid,
       });
-      return res.status(200).json({ userId });
     }
 
     const { userId } = await this.usersService.create({
@@ -41,7 +46,11 @@ export class AuthController {
       canvaUserId,
     });
 
-    return res.status(201).json({ userId });
+    return res.status(201).json({
+      userId,
+      hasNotionAccessToken: false,
+      isNotionAccessTokenValid: false,
+    });
   }
 
   @Post('/authorise/proceed')
@@ -58,7 +67,7 @@ export class AuthController {
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
-      userId: userId.userId,
+      userId,
     });
 
     if (!isRegisteredUser) {
@@ -145,6 +154,7 @@ export class AuthController {
       notionWorkspaceId,
       notionWorkspaceIcon,
       notionOwner: JSON.stringify(owner),
+      isNotionAccessTokenValid: false,
     });
 
     if (!Boolean(affected)) {

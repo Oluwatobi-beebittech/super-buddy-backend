@@ -15,7 +15,6 @@ export class NotionBuddyUser extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 50,
-    unique: true,
   })
   canvaUserId: string;
 
@@ -75,6 +74,12 @@ export class NotionBuddyUser extends BaseEntity {
     nullable: true,
   })
   notionWorkspaceId: string;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isNotionAccessTokenValid: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
