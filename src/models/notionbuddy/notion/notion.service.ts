@@ -7,6 +7,7 @@ import { map, lastValueFrom } from 'rxjs';
 export class NotionService {
   private notionSearchURL: string;
   private notionVersion: string;
+  private notionBlocks: string;
 
   constructor(
     private configService: ConfigService,
@@ -14,6 +15,7 @@ export class NotionService {
   ) {
     this.notionSearchURL = this.configService.get<string>('NOTION_SEARCH_URL');
     this.notionVersion = this.configService.get<string>('NOTION_VERSION');
+    this.notionBlocks = 'https://api.notion.com/v1/blocks';
   }
 
   private getHttpHeaders(notionAccessToken) {
@@ -46,5 +48,38 @@ export class NotionService {
     );
 
     return { isNotionAccessTokenValid: status === 200 };
+  }
+
+  async getAllPages(notionAccessToken: string): Promise<any> {
+    const notionPageSearchPayload = {
+      query: '',
+      filter: {
+        property: 'object',
+        value: 'page',
+      },
+    };
+
+    const response = await lastValueFrom(
+      this.httpService
+        .post(this.notionSearchURL, notionPageSearchPayload, {
+          ...this.getHttpHeaders(notionAccessToken),
+        })
+        .pipe(map((response) => response.data)),
+    );
+
+    return response;
+  }
+
+  async getPageBlocks(notionAccessToken: string, pageId: string): Promise<any> {
+    const url = `${this.notionBlocks}/${pageId}/children`;
+    const response = await lastValueFrom(
+      this.httpService
+        .get(url, {
+          ...this.getHttpHeaders(notionAccessToken),
+        })
+        .pipe(map((response) => response.data)),
+    );
+
+    return response;
   }
 }
