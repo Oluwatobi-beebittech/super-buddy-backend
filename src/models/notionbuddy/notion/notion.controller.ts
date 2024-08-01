@@ -8,6 +8,7 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
+import { CustomErrorCode } from 'src/utilities';
 
 import { NotionService } from './notion.service';
 import { AuthService } from '../auth/auth.service';
@@ -36,11 +37,12 @@ export class NotionController {
       await this.authService.authoriseUser(userToken);
 
     if (!isUserTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `verify-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+      });
     }
-    console.log({ isUserTokenVerified });
+
     const isRegisteredUser = await this.usersService.isRegisteredUser({
       canvaUserId,
     });
@@ -49,6 +51,7 @@ export class NotionController {
       return res.status(401).json({
         message:
           'User is unauthorised to access this resource. Navigate to connect to notion',
+        internalStatusCode: `verify-${CustomErrorCode.NOT_REGISTERED_USER}`,
       });
     }
 
@@ -62,24 +65,22 @@ export class NotionController {
       return res.status(401).json({
         message:
           'User has no notion access token unauthorised to access this resource. Navigate to connect to notion',
+        internalStatusCode: `verify-${CustomErrorCode.NO_NOTION_ACCESS_TOKEN}`,
       });
     }
-    console.log({ isUserTokenVerified, sec: 'ssss' });
-    //verify notion access token can return results for page check
-    //call service to call notion API
+
     const { isNotionAccessTokenValid } =
       await this.notionService.verify(notionAccessToken);
-    //if successful
+
     await this.usersService.update(userId, {
       isNotionAccessTokenValid,
     });
 
-    console.log({ isNotionAccessTokenValid });
-
     if (!isNotionAccessTokenValid) {
-      return res
-        .status(401)
-        .json({ message: 'Unauthorise notion token. Reconnect again' });
+      return res.status(401).json({
+        message: 'Unauthorise notion token. Reconnect again',
+        internalStatusCode: `verify-${CustomErrorCode.ACCESS_TOKEN_VALIDITY}`,
+      });
     }
 
     return res.status(200).json({
@@ -100,18 +101,20 @@ export class NotionController {
       await this.authService.authoriseUser(userToken);
 
     if (!isUserTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `pages-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+      });
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
       canvaUserId,
     });
     if (!isRegisteredUser) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `pages-${CustomErrorCode.NOT_REGISTERED_USER}`,
+      });
     }
 
     const { notionAccessToken } = await this.usersService.getRegisteredUser({
@@ -136,18 +139,20 @@ export class NotionController {
       await this.authService.authoriseUser(userToken);
 
     if (!isUserTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `page-id-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+      });
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
       canvaUserId,
     });
     if (!isRegisteredUser) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `page-id-${CustomErrorCode.NOT_REGISTERED_USER}`,
+      });
     }
 
     const { notionAccessToken, isNotionAccessTokenValid } =
@@ -156,9 +161,10 @@ export class NotionController {
       });
 
     if (!isNotionAccessTokenValid) {
-      return res
-        .status(401)
-        .json({ message: 'Unauthorise notion token. Reconnect again' });
+      return res.status(401).json({
+        message: 'Unauthorise notion token. Reconnect again',
+        internalStatusCode: `page-id-${CustomErrorCode.ACCESS_TOKEN_VALIDITY}`,
+      });
     }
 
     const response = await this.notionService.getPageBlocks(
@@ -181,9 +187,10 @@ export class NotionController {
       await this.authService.authoriseUser(userToken);
 
     if (!isUserTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `disconnect-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+      });
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
@@ -191,9 +198,10 @@ export class NotionController {
       canvaUserId,
     });
     if (!isRegisteredUser) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `disconnect-${CustomErrorCode.NOT_REGISTERED_USER}`,
+      });
     }
 
     const { affected } = await this.usersService.delete(userId);
@@ -202,6 +210,9 @@ export class NotionController {
       return res.status(200).json({ message: 'Disconnection successful' });
     }
 
-    return res.status(401).json({ message: 'Unsuccessful disconnection' });
+    return res.status(401).json({
+      message: 'Unsuccessful disconnection',
+      internalStatusCode: `disconnect-${CustomErrorCode.UNSUCCESSFUL_DISCONNECTION}`,
+    });
   }
 }

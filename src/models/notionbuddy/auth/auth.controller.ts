@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Request, Res } from '@nestjs/common';
+import { CustomErrorCode } from 'src/utilities';
 
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
@@ -21,9 +22,10 @@ export class AuthController {
       await this.authService.authoriseUser(userToken);
 
     if (!isUserTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'User is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'User is unauthorised to access this resource',
+        internalStatusCode: `authorise-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+      });
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
@@ -61,9 +63,10 @@ export class AuthController {
       await this.authService.authoriseDesign(designToken);
 
     if (!isDesignTokenVerified) {
-      return res
-        .status(401)
-        .json({ message: 'Design is unauthorised to access this resource' });
+      return res.status(401).json({
+        message: 'Design is unauthorised to access this resource',
+        internalStatusCode: `proceed-${CustomErrorCode.DESIGN_TOKEN_VERIFIED}`,
+      });
     }
 
     const isRegisteredUser = await this.usersService.isRegisteredUser({
@@ -73,7 +76,7 @@ export class AuthController {
     if (!isRegisteredUser) {
       return res.status(401).json({
         message: 'User is unauthorised to access this resource',
-        userId,
+        internalStatusCode: `proceed-${CustomErrorCode.NOT_REGISTERED_USER}`,
       });
     }
 
@@ -85,9 +88,10 @@ export class AuthController {
       return res.status(200).json({ message: 'Design verified successfully' });
     }
 
-    return res
-      .status(401)
-      .json({ message: 'Unsuccessful design verification' });
+    return res.status(401).json({
+      message: 'Unsuccessful design verification',
+      internalStatusCode: `proceed-${CustomErrorCode.NO_DESIGN_VERIFICATION}`,
+    });
   }
 
   @Get('/connect')
@@ -106,10 +110,10 @@ export class AuthController {
       return res.status(302).redirect(redirectionURL);
     }
 
-    //navigate to superbuddy page to show unauthorised message
-    res
-      .status(401)
-      .json({ message: 'User is unauthorised to perform this operation' });
+    res.status(401).json({
+      message: 'User is unauthorised to perform this operation',
+      internalStatusCode: `connect-${CustomErrorCode.NOT_REGISTERED_USER}`,
+    });
   }
 
   @Get('/callback')
@@ -158,7 +162,6 @@ export class AuthController {
     });
 
     if (!Boolean(affected)) {
-      //should log error inserting record for userID
       res.status(302).redirect(canvaDesignURL);
     }
 
