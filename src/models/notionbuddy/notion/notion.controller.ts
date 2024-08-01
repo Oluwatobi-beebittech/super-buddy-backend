@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -166,5 +167,41 @@ export class NotionController {
     );
 
     return res.status(200).json(response);
+  }
+
+  @Delete('/disconnect/:id')
+  async disconnectFromNotion(
+    @Param('id') userId: string,
+    @Request() request,
+    @Res() res,
+  ) {
+    const [, userToken] = request.headers.authorization?.split(' ');
+
+    const { isUserTokenVerified, canvaUserId } =
+      await this.authService.authoriseUser(userToken);
+
+    if (!isUserTokenVerified) {
+      return res
+        .status(401)
+        .json({ message: 'User is unauthorised to access this resource' });
+    }
+
+    const isRegisteredUser = await this.usersService.isRegisteredUser({
+      userId,
+      canvaUserId,
+    });
+    if (!isRegisteredUser) {
+      return res
+        .status(401)
+        .json({ message: 'User is unauthorised to access this resource' });
+    }
+
+    const { affected } = await this.usersService.delete(userId);
+
+    if (Boolean(affected)) {
+      return res.status(200).json({ message: 'Disconnection successful' });
+    }
+
+    return res.status(401).json({ message: 'Unsuccessful disconnection' });
   }
 }

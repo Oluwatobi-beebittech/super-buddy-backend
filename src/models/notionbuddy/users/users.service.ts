@@ -21,6 +21,10 @@ export class UsersService {
     return await this.userRepository.update(userId, updateUserDto);
   }
 
+  async delete(userId: string) {
+    return await this.userRepository.delete(userId);
+  }
+
   async isRegisteredUser(userSearchObject: FindOptionsWhere<NotionBuddyUser>) {
     return await this.userRepository.existsBy(userSearchObject);
   }
