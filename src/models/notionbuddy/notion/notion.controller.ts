@@ -40,6 +40,7 @@ export class NotionController {
       return res.status(401).json({
         message: 'User is unauthorised to access this resource',
         internalStatusCode: `verify-${CustomErrorCode.USER_TOKEN_VERIFIED}`,
+        isNotionAccessTokenValid: false,
       });
     }
 
@@ -52,6 +53,7 @@ export class NotionController {
         message:
           'User is unauthorised to access this resource. Navigate to connect to notion',
         internalStatusCode: `verify-${CustomErrorCode.NOT_REGISTERED_USER}`,
+        isNotionAccessTokenValid: false,
       });
     }
 
@@ -66,6 +68,7 @@ export class NotionController {
         message:
           'User has no notion access token unauthorised to access this resource. Navigate to connect to notion',
         internalStatusCode: `verify-${CustomErrorCode.NO_NOTION_ACCESS_TOKEN}`,
+        isNotionAccessTokenValid: false,
       });
     }
 
@@ -78,8 +81,9 @@ export class NotionController {
 
     if (!isNotionAccessTokenValid) {
       return res.status(401).json({
-        message: 'Unauthorise notion token. Reconnect again',
+        message: 'Unauthorised Notion connection. Reconnect again',
         internalStatusCode: `verify-${CustomErrorCode.ACCESS_TOKEN_VALIDITY}`,
+        isNotionAccessTokenValid,
       });
     }
 
@@ -162,7 +166,7 @@ export class NotionController {
 
     if (!isNotionAccessTokenValid) {
       return res.status(401).json({
-        message: 'Unauthorise notion token. Reconnect again',
+        message: 'Unauthorised notion token. Reconnect again',
         internalStatusCode: `page-id-${CustomErrorCode.ACCESS_TOKEN_VALIDITY}`,
       });
     }
@@ -171,6 +175,14 @@ export class NotionController {
       notionAccessToken,
       id,
     );
+
+    if (response?.isError) {
+      return res.status(401).json({
+        message: 'Unable to retrieve page blocks. Reconnect again',
+        internalStatusCode: `page-id-${CustomErrorCode.ACCESS_TOKEN_VALIDITY}`,
+        isNotionAccessTokenValid,
+      });
+    }
 
     return res.status(200).json(response);
   }

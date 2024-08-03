@@ -39,15 +39,19 @@ export class NotionService {
       },
     };
 
-    const status = await lastValueFrom(
-      this.httpService
-        .post(this.notionSearchURL, notionPageSearchPayload, {
-          ...this.getHttpHeaders(notionAccessToken),
-        })
-        .pipe(map((response) => response.status)),
-    );
+    try {
+      const status = await lastValueFrom(
+        this.httpService
+          .post(this.notionSearchURL, notionPageSearchPayload, {
+            ...this.getHttpHeaders(notionAccessToken),
+          })
+          .pipe(map((response) => response.status)),
+      );
 
-    return { isNotionAccessTokenValid: status === 200 };
+      return { isNotionAccessTokenValid: status === 200 };
+    } catch (error) {
+      return { isNotionAccessTokenValid: false };
+    }
   }
 
   async getAllPages(notionAccessToken: string): Promise<any> {
@@ -72,14 +76,17 @@ export class NotionService {
 
   async getPageBlocks(notionAccessToken: string, pageId: string): Promise<any> {
     const url = `${this.notionBlocks}/${pageId}/children`;
-    const response = await lastValueFrom(
-      this.httpService
-        .get(url, {
-          ...this.getHttpHeaders(notionAccessToken),
-        })
-        .pipe(map((response) => response.data)),
-    );
-
-    return response;
+    try {
+      const response = await lastValueFrom(
+        this.httpService
+          .get(url, {
+            ...this.getHttpHeaders(notionAccessToken),
+          })
+          .pipe(map((response) => response.data)),
+      );
+      return response;
+    } catch (error) {
+      return { isError: true };
+    }
   }
 }
