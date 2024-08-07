@@ -26,7 +26,7 @@ export const DigitalOceanConfig: DigitalOceanConfig = {
   DB_PORT: process.env.MYSQLPORT,
   DB_USER: process.env.MYSQLUSER,
   DB_PASSWORD: process.env.MYSQLPASSWORD,
-  DB_DATABASE: process.env.MYSQLDATABASE,
+  DB_DATABASE: process.env.MYSQL_DATABASE,
   DB_URL: process.env.MYSQL_URL,
   NOTIONBUDDY_FRONTEND_BASE_URL: process.env.NOTIONBUDDY_FRONTEND_BASE_URL,
   CANVA_JWKS_URL: process.env.CANVA_JWKS_URL,

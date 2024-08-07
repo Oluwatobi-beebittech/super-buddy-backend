@@ -13,7 +13,6 @@ const { DB_HOST, DB_PORT, DB_USER, DB_URL, DB_PASSWORD, DB_DATABASE } =
 console.log({ DB_HOST, DB_PORT, DB_USER, DB_URL, DB_PASSWORD, DB_DATABASE });
 
 export const typeOrmConfig: MysqlConnectionOptions = {
-  url: DB_URL,
   type: 'mysql',
   host: DB_HOST,
   port: Number(DB_PORT),
